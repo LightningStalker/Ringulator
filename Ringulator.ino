@@ -7,8 +7,11 @@
    Nov 2021 The Lightning Stalker
 */
 
+#include <FreqCount.h>   // input pin will depend on MCU, D5 for UNO, see FreqCount docs
 #include <Wire.h>
-#include "rgb_lcd.h"
+#include "rgb_lcd.h"     // Seed Grove-LCD RGB Backlight
+
+#undef TIMER_USE_TIMER2  // no calibration factor
 
 #define BD 40            // display brightness
 
@@ -17,16 +20,12 @@
 
 rgb_lcd lcd;             // instantiate lcd variable
 
-const byte inputPin = 2; // must be an interrupt capable pin
-const byte pulsePin = 3; // pin going to transistor
+const byte pulsePin = 2; // pin going to transistor
 volatile byte count = 0; // interrupt driven counter variable
 
 void setup() {
   // put your setup code here, to run once:
-  pinModeInp(inputPin); // saves 112kb over pinMode()! (?)
-  pinModeOut(pulsePin);
-
-  attachInterrupt(digitalPinToInterrupt(inputPin), updateCounter, RISING); // set up ISR
+  pinModeOut(pulsePin);  // saves 62 bytes(!)
 
   lcd.begin(16, 2); // 16 character, 2 line display
   lcd.setRGB(BD, BD, BD); // reduce brightness
@@ -41,12 +40,17 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  digitalWrite(pulsePin, LOW); // charge capacitor
-  delay(110);
-  count = 0;                   // take erasurement
-  digitalWrite(pulsePin, HIGH);
-  delay(266);
 
+  digitalWrite(pulsePin, LOW);   // charge capacitor
+  delay(110);
+  digitalWrite(pulsePin, HIGH);  // δ
+
+  FreqCount.begin(226);          // begin count
+  while (!FreqCount.available());
+  count = FreqCount.read();      // take erasurement
+  FreqCount.end();               // switch blanking
+
+  // Begin output routine
   //  Serial.println(count);
   lcd.clear();
   if (count <= 0) {
@@ -61,9 +65,4 @@ void loop() {
     lcd.print(count);
     lcd.print(" Rings");
   }
-}
-
-void updateCounter() {
-  // interrupt service routine:
-  count++;
 }
