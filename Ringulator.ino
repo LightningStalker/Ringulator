@@ -1,7 +1,7 @@
 /*
    GPL LICENSE v3.0
 
-   Atmega 328 Coil Tester
+   MCU Coil Tester
    https://youtu.be/QBbEYYWiBI8
 
    Nov 2021 The Lightning Stalker
@@ -11,7 +11,8 @@
 #include <Wire.h>
 #include "rgb_lcd.h"     // Seed Grove-LCD RGB Backlight
 
-#undef TIMER_USE_TIMER2  // no calibration factor
+// no calibration factor
+#undef TIMER_USE_TIMER2
 
 #define BD 40            // display brightness
 
@@ -21,7 +22,7 @@
 rgb_lcd lcd;             // instantiate lcd variable
 
 const byte pulsePin = 2; // pin going to transistor
-volatile byte count = 0; // interrupt driven counter variable
+unsigned long count = 0; // ring count
 
 void setup() {
   // put your setup code here, to run once:
