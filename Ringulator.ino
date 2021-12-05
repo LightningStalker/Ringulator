@@ -54,7 +54,7 @@ void loop() {
   //  Serial.println(count);
   lcd.clear();
   if (count <= 0) {
-    lcd.print("Ringulator v1.0");
+    lcd.print("Ringulator v1.1");
     lcd.setCursor(0, 1);
     lcd.print("Listening...");
   }
